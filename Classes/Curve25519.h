@@ -16,6 +16,7 @@
 }
 
 -(NSData*) publicKey;
+-(NSData*) privateKey;
 
 @end
 
@@ -38,6 +39,8 @@
  *  @return curve25519 key pair.
  */
 
-+ (ECKeyPair*)generateKeyPair;
++ (ECKeyPair*)generateKeyPair:(NSData*)seed;
+
++ (NSData*)sign:(NSData*)data withPrivateKey:(NSData*)key;
 
 @end

@@ -54,11 +54,11 @@ extern int  curve25519_sign(unsigned char* signature_out, /* 64 bytes */
 }
 
 
-+(ECKeyPair*)generateKeyPair{
++(ECKeyPair*)generateKeyPair:(NSData*)seed {
     ECKeyPair* keyPair =[[ECKeyPair alloc] init];
     
     // Generate key pair as described in https://code.google.com/p/curve25519-donna/
-    memcpy(keyPair->privateKey, [[Randomness  generateRandomBytes:32] bytes], 32);
+    memcpy(keyPair->privateKey, [seed bytes], 32);
     keyPair->privateKey[0]  &= 248;
     keyPair->privateKey[31] &= 127;
     keyPair->privateKey[31] |= 64;
@@ -71,6 +71,10 @@ extern int  curve25519_sign(unsigned char* signature_out, /* 64 bytes */
 
 -(NSData*) publicKey {
     return [NSData dataWithBytes:self->publicKey length:32];
+}
+
+-(NSData*) privateKey {
+    return [NSData dataWithBytes:self->privateKey length:32];
 }
 
 -(NSData*) sign:(NSData*)data{
@@ -113,12 +117,25 @@ extern int  curve25519_sign(unsigned char* signature_out, /* 64 bytes */
 
 @implementation Curve25519
 
-+(ECKeyPair*)generateKeyPair{
-    return [ECKeyPair generateKeyPair];
++(ECKeyPair*)generateKeyPair:(NSData*)seed{
+    return [ECKeyPair generateKeyPair:seed];
 }
 
 +(NSData*)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair{
     return [keyPair generateSharedSecretFromPublicKey:theirPublicKey];
+}
+
++ (NSData*)sign:(NSData*)data withPrivateKey:(NSData*)key{
+    Byte signatureBuffer[ECCSignatureLength];
+    NSData *randomBytes = [Randomness generateRandomBytes:64];
+    
+    if(curve25519_sign(signatureBuffer, key.bytes, [data bytes], [data length], [randomBytes bytes]) == -1 ){
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Message couldn't be signed." userInfo:nil];
+    }
+    
+    NSData *signature = [NSData dataWithBytes:signatureBuffer length:ECCSignatureLength];
+    
+    return signature;
 }
 
 @end
