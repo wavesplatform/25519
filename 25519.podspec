@@ -15,5 +15,6 @@ Pod::Spec.new do |spec|
   spec.source_files = 'Classes/*.{h,m}', 'Sources/Curve25519/curve25519-donna.c', 'Sources/ed25519/*.{c,h}', 'Sources/ed25519/additions/*.{c,h}', 'Sources/ed25519/nacl_sha512/*.{c,h}', 'Sources/ed25519/nacl_includes/*.{c,h}'
   spec.framework    = 'Security'
   spec.public_header_files = "Classes/*.h"
+  spec.ios.deployment_target = '10.0'
   spec.requires_arc = true
 end
